@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wings for Earth | Preservación de Mariposas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --orange: #f39200; 
+            --orange-hover: #d47f00;
+            --forest-green: #1e4d2b; 
+            --dark-green: #14361e; 
+            --light-green: #f0f7f1; 
+            --white: #ffffff;
+        }
+
+        body { font-family: 'Roboto', sans-serif; margin: 0; padding: 0; line-height: 1.6; background-color: var(--white); scroll-behavior: smooth; }
+        h1, h2, h3, .nav-link { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
+
+        /* HEADER & NAVIGATION */
+        header { background: var(--forest-green); color: white; display: flex; align-items: center; height: 70px; position: sticky; top: 0; z-index: 1000; padding: 0 5%; }
+        
+        .logo-box { background: white; padding: 5px 15px; margin-right: 20px; border-radius: 3px; transition: transform 0.3s; cursor: pointer; }
+        .logo-box:hover { transform: scale(1.05); }
+        .logo-box img { height: 45px; vertical-align: middle; }
+
+        nav { flex-grow: 1; }
+        nav ul { list-style: none; display: flex; margin: 0; padding: 0; }
+        .menu-item { position: relative; }
+        .menu-item a { color: white; text-decoration: none; padding: 25px 12px; display: block; font-size: 13px; font-weight: bold; transition: 0.3s; cursor: pointer; }
+        .menu-item:hover > a { background: var(--dark-green); color: var(--orange); }
+        
+        .dropdown { display: none; position: absolute; background: var(--forest-green); min-width: 180px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .menu-item:hover .dropdown { display: block; }
+        .dropdown a { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 12px; }
+        .dropdown a:hover { background: var(--dark-green); color: var(--orange); }
+
+        .btn-socio { background: var(--orange); color: white !important; height: 70px; display: flex; align-items: center; padding: 0 25px !important; margin-left: auto; font-weight: bold; cursor: pointer; border: none; font-family: 'Oswald'; font-size: 16px; transition: 0.3s; }
+        .btn-socio:hover { background: var(--orange-hover); letter-spacing: 1px; }
+
+        /* LÓGICA DE PÁGINAS */
+        .page { display: none; min-height: 70vh; }
+        .page.active { display: block; }
+
+        /* SECCIONES */
+        .hero-sub { background: var(--dark-green); color: white; text-align: center; padding: 60px 20px; }
+        .container { max-width: 1100px; margin: auto; padding: 40px 20px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 30px; }
+        .card { border: 1px solid #ddd; background: white; transition: all 0.3s ease; cursor: pointer; height: 100%; }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: var(--orange); }
+        .card img { width: 100%; height: 250px; object-fit: cover; }
+        .card-content { padding: 20px; }
+        .card-content h3 { margin-top: 0; color: var(--forest-green); transition: 0.3s; }
+        .card:hover h3 { color: var(--orange); }
+
+        /* MODAL FORMULARIO */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); align-items: center; justify-content: center; }
+        .modal-content { background-color: white; padding: 40px; border-radius: 8px; width: 90%; max-width: 500px; position: relative; animation: slideIn 0.4s; }
+        @keyframes slideIn { from {transform: translateY(-50px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
+        
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; color: #888; }
+        .close-modal:hover { color: black; }
+
+        form input, form select, form textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .btn-enviar { background: var(--forest-green); color: white; border: none; padding: 15px; width: 100%; font-family: 'Oswald'; font-size: 18px; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-enviar:hover { background: var(--orange); }
+
+        /* CAMBIO DE HÁBITOS */
+        .habits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 30px 0; }
+        .habit-container { width: 100%; height: 250px; overflow: hidden; border-radius: 8px; }
+        .habit-img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .habit-container:hover .habit-img { transform: scale(1.1); }
+
+        /* BIBLIOTECA */
+        .library-item img { width: 100%; height: 200px; object-fit: cover; }
+
+        footer { background: var(--dark-green); color: white; text-align: center; padding: 40px; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-box" onclick="showPage('inicio')">
+        <img src="https://github.com/PaulaGoMA/WebMariposas/blob/main/img/LogoWings.png?raw=true" alt="Logo Wings for Earth">
+    </div>
+    <nav>
+        <ul>
+            <li class="menu-item">
+    		<a href="#">Somos ▾</a>
+    		<div class="dropdown">
+        	   <a onclick="showPage('equipo')">Equipo</a>
+        	   <a onclick="showPage('mision')">Misión</a>
+        	   <a onclick="showPage('transparencia')">Transparencia</a>
+       	 	   <a onclick="showPage('trabaja')">Trabaja en Wings</a>
+        	   <a onclick="showPage('historia')">Historia</a>
+    		</div>
+	    </li>
+            <li class="menu-item"><a href="#">Nuestro Trabajo</a></li>
+            <li class="menu-item">
+                <a href="#">Infórmate ▾</a>
+                <div class="dropdown">
+                    <a onclick="showPage('actualidad')">Actualidad</a>
+                    <a onclick="showPage('revista')">Revista Lepidóptera</a>
+                    <a onclick="showPage('biblioteca')">Biblioteca</a>
+                    <a onclick="showPage('blog')">Blog de Expertos</a>
+                    <a onclick="showPage('contacta')">Contacta</a>
+                    <a onclick="showPage('habitos')">Cambia de hábitos</a>
+                </div>
+            </li>
+            <li class="menu-item"><a href="#">Participa</a></li>
+            <li class="menu-item"><a href="#">Colabora</a></li>
+        </ul>
+    </nav>
+    <button class="btn-socio" onclick="openModal()">HAZTE SOCIO</button>
+</header>
+
+<div id="modalSocio" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h2 style="color: var(--forest-green); margin-top: 0;">Únete a Wings for Earth</h2>
+        <form onsubmit="event.preventDefault(); alert('¡Gracias! Formulario enviado'); closeModal();">
+            <input type="text" placeholder="Nombre completo" required>
+            <input type="email" placeholder="Correo electrónico" required>
+            <label style="font-size: 14px;">Periodicidad:</label>
+            <select>
+                <option>Mensual</option>
+                <option>Anual</option>
+            </select>
+            <button type="submit" class="btn-enviar">CONFIRMAR</button>
+        </form>
+    </div>
+</div>
+
+<div id="inicio" class="page active">
+    <section style="
+        position: relative; 
+        height: 80vh; 
+        min-height: 500px; 
+        background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?q=80&w=2000'); 
+        background-size: cover; 
+        background-position: center; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        text-align: center; 
+        color: white;
+    ">
+        <div style="max-width: 800px; padding: 0 20px;">
+            <h1 style="font-size: 4rem; margin-bottom: 10px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5);">
+                BIENVENIDO A <span style="color: var(--orange);">WINGS FOR EARTH</span>
+            </h1>
+            <p style="font-size: 1.5rem; font-weight: 300; margin-bottom: 30px;">
+                Preservando mariposas y cuidando el equilibrio de la naturaleza.
+            </p>
+            <div style="display: flex; gap: 20px; justify-content: center;">
+                <button onclick="showPage('actualidad')" style="background: var(--orange); color: white; border: none; padding: 15px 30px; font-family: 'Oswald'; font-size: 1.1rem; cursor: pointer; transition: 0.3s; border-radius: 4px;">
+                    DESCUBRE MÁS
+                </button>
+                <button onclick="openModal()" style="background: transparent; color: white; border: 2px solid white; padding: 15px 30px; font-family: 'Oswald'; font-size: 1.1rem; cursor: pointer; transition: 0.3s; border-radius: 4px;">
+                    HAZTE SOCIO
+                </button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div id="equipo" class="page">
+    <section class="hero-sub" style="background: var(--dark-green); color: white; text-align: center; padding: 60px 20px;">
+        <h1>NUESTRO EQUIPO</h1>
+        <p>Las mentes y corazones detrás de Wings for Earth trabajando por la biodiversidad.</p>
+    </section>
+
+    <div class="container" style="max-width: 1100px; margin: auto; padding: 40px 20px;">
+        <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; text-align: center;">
+            
+            <div class="card" style="padding: 30px; border-radius: 12px; background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.05);">
+                <div style="width: 100px; height: 100px; background: var(--light-green); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">👨‍💻</div>
+                <h3 style="color: var(--forest-green); margin-bottom: 5px;">Alex</h3>
+                <p style="color: var(--orange); font-weight: bold; font-size: 14px; text-transform: uppercase;">Director de Conservación</p>
+                <p style="font-size: 14px; color: #666;">Especialista en corredores biológicos y hábitats fluviales.</p>
+            </div>
+
+            <div class="card" style="padding: 30px; border-radius: 12px; background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.05);">
+                <div style="width: 100px; height: 100px; background: var(--light-green); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">👩‍🔬</div>
+                <h3 style="color: var(--forest-green); margin-bottom: 5px;">Gala</h3>
+                <p style="color: var(--orange); font-weight: bold; font-size: 14px; text-transform: uppercase;">Investigadora Científica</p>
+                <p style="font-size: 14px; color: #666;">Experta en entomología y el impacto del cambio climático.</p>
+            </div>
+
+            <div class="card" style="padding: 30px; border-radius: 12px; background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.05);">
+                <div style="width: 100px; height: 100px; background: var(--light-green); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">👩‍🏫</div>
+                <h3 style="color: var(--forest-green); margin-bottom: 5px;">Lucía</h3>
+                <p style="color: var(--orange); font-weight: bold; font-size: 14px; text-transform: uppercase;">Educación Ambiental</p>
+                <p style="font-size: 14px; color: #666;">Coordina programas escolares y divulgación en la comunidad.</p>
+            </div>
+
+            <div class="card" style="padding: 30px; border-radius: 12px; background: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.05);">
+                <div style="width: 100px; height: 100px; background: var(--light-green); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 40px;">👩‍🎨</div>
+                <h3 style="color: var(--forest-green); margin-bottom: 5px;">Paula</h3>
+                <p style="color: var(--orange); font-weight: bold; font-size: 14px; text-transform: uppercase;">Comunicación Digital</p>
+                <p style="font-size: 14px; color: #666;">Responsable de la presencia web y campañas de sensibilización.</p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="mision" class="page">
+    <section class="hero-sub" style="background: var(--dark-green); color: white; text-align: center; padding: 60px 20px;">
+        <h1>NUESTRA MISIÓN</h1>
+        <p>Asegurando el vuelo del mañana a través de la protección del hoy.</p>
+    </section>
+
+    <div class="container" style="max-width: 900px; margin: auto; padding: 40px 20px; line-height: 1.8;">
+        
+        <div style="text-align: center; margin-bottom: 50px;">
+            <h2 style="color: var(--orange); font-size: 2rem; margin-bottom: 20px;">Conoce nuestro compromiso con la naturaleza</h2>
+            <p style="font-size: 1.1rem; color: #444;">
+                Wings for Earth nace con la vocación de ser el escudo de los lepidópteros en España, trabajando para que las futuras generaciones puedan vivir en armonía con la biodiversidad.
+            </p>
+        </div>
+
+        <div style="background: var(--light-green); padding: 30px; border-radius: 12px; border-left: 5px solid var(--orange); margin-bottom: 40px;">
+            <h3 style="color: var(--forest-green); margin-top: 0;">Nuestra Misión Principal</h3>
+            <p style="margin-bottom: 0;">
+                Somos testigos de la fragilidad de nuestros ecosistemas. Por ello, la misión de <strong>Wings for Earth</strong> es construir un futuro donde las mariposas dispongan de hábitats resilientes, actuando como indicadores vitales de la salud de nuestro planeta. Trabajamos para conservar y restaurar la biodiversidad, frenando la pérdida de especies polinizadoras esenciales.
+            </p>
+        </div>
+
+        <h2 style="text-align: center; color: var(--forest-green); margin-top: 50px;">Nuestros Valores</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px;">
+            <div style="text-align: center; padding: 20px;">
+                <h4 style="color: var(--orange); text-transform: uppercase;">Respeto</h4>
+                <p style="font-size: 14px;">Valoramos la interconexión de todas las formas de vida y el papel crucial de los micro-hábitats.</p>
+            </div>
+            <div style="text-align: center; padding: 20px;">
+                <h4 style="color: var(--orange); text-transform: uppercase;">Integridad</h4>
+                <p style="font-size: 14px;">Actuamos bajo una sólida base científica para guiar nuestras acciones de restauración ambiental.</p>
+            </div>
+            <div style="text-align: center; padding: 20px;">
+                <h4 style="color: var(--orange); text-transform: uppercase;">Colaboración</h4>
+                <p style="font-size: 14px;">Unimos fuerzas con comunidades locales y expertos para crear oasis de biodiversidad.</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 50px; text-align: center; border-top: 1px solid #eee; padding-top: 30px;">
+            <p style="font-style: italic; color: #666;">
+                "Una mariposa que bate sus alas puede cambiar el destino del ecosistema si le damos el lugar adecuado para volar."
+            </p>
+        </div>
+    </div>
+</div>
+
+<div id="transparencia" class="page">
+    <section class="hero-sub" style="background: var(--dark-green); color: white; text-align: center; padding: 60px 20px;">
+        <h1>SOMOS TRANSPARENTES</h1>
+        <p>La confianza de nuestros socios es el motor de nuestra labor de conservación.</p>
+    </section>
+
+    <div class="container" style="max-width: 1000px; margin: auto; padding: 40px 20px; text-align: center;">
+        
+        <div style="max-width: 800px; margin: 0 auto 50px auto; color: #444; line-height: 1.6;">
+            <p>La transparencia es una de nuestras prioridades. Nuestras cuentas son públicas y están sometidas a controles y auditorías regulares para garantizar la adecuada gestión de los fondos destinados a la protección de las mariposas.</p>
+            <p>Somos una organización <strong>no gubernamental totalmente independiente</strong> de toda ideología política o intereses económicos. Todos nuestros recursos se dedican a la lucha contra el cambio climático y la defensa de la naturaleza.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+            
+            <div style="background: #f4f4f4; padding: 30px; border-radius: 4px; display: flex; flex-direction: column; justify-content: space-between;">
+                <h3 style="font-family: 'Oswald'; font-size: 1.2rem; color: #333; margin-top: 0;">INFORMACIÓN INSTITUCIONAL Y ORGANIZATIVA</h3>
+                <button style="background: var(--orange); border: none; color: white; padding: 12px; font-family: 'Oswald'; cursor: pointer; border-radius: 2px; margin-top: 20px;">VER ></button>
+            </div>
+
+            <div style="background: #f4f4f4; padding: 30px; border-radius: 4px; display: flex; flex-direction: column; justify-content: space-between;">
+                <h3 style="font-family: 'Oswald'; font-size: 1.2rem; color: #333; margin-top: 0;">MARCO LEGAL DE WINGS FOR EARTH</h3>
+                <button style="background: var(--orange); border: none; color: white; padding: 12px; font-family: 'Oswald'; cursor: pointer; border-radius: 2px; margin-top: 20px;">VER ></button>
+            </div>
+
+            <div style="background: #f4f4f4; padding: 30px; border-radius: 4px; display: flex; flex-direction: column; justify-content: space-between;">
+                <h3 style="font-family: 'Oswald'; font-size: 1.2rem; color: #333; margin-top: 0;">INFORMACIÓN ECONÓMICA Y PRESUPUESTARIA</h3>
+                <button style="background: var(--orange); border: none; color: white; padding: 12px; font-family: 'Oswald'; cursor: pointer; border-radius: 2px; margin-top: 20px;">VER ></button>
+            </div>
+
+        </div>
+
+        <div style="margin-top: 40px; display: flex; justify-content: center; gap: 15px; font-size: 20px; color: #333;">
+            <i class="fab fa-facebook"></i> <i class="fab fa-instagram"></i> <i class="fab fa-youtube"></i> <i class="fab fa-twitter"></i>
+        </div>
+    </div>
+</div>
+
+<div id="trabaja" class="page">
+    <section class="hero-sub" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=2000'); background-size: cover; background-position: center; padding: 80px 20px;">
+        <h1 style="font-size: 3rem; letter-spacing: 2px;">TRABAJA EN DEFENSA DE LA NATURALEZA</h1>
+    </section>
+
+    <div class="container" style="max-width: 900px; margin: auto; padding: 60px 20px; text-align: center;">
+        
+        <h2 style="font-family: 'Oswald'; color: #333; margin-bottom: 20px;">OFERTAS DE EMPLEO Y LICITACIONES</h2>
+        
+        <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
+            En esta sección publicamos las ofertas de trabajo para formar parte del equipo de profesionales de <strong>Wings for Earth</strong>, así como las <strong>licitaciones</strong> para participar en nuestros proyectos de conservación.
+            <br>
+            Para acceder a ofertas de empleo en nuestras oficinas internacionales, consulta nuestra red global o nuestro perfil de LinkedIn.
+        </p>
+
+        <h3 style="font-family: 'Oswald'; color: #888; margin-bottom: 25px; font-weight: 400;">Consulta las ofertas abiertas actualmente</h3>
+
+        <button style="background: #333; color: white; border: none; padding: 18px 40px; font-family: 'Oswald'; font-size: 1.2rem; cursor: pointer; transition: 0.3s; border-radius: 2px; margin-bottom: 60px;">
+            CONSULTAR OFERTAS DISPONIBLES <span style="margin-left: 10px;">></span>
+        </button>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            
+            <div style="background: #f4f4f4; padding: 20px;">
+                <button style="background: var(--orange); color: white; border: none; width: 100%; padding: 15px; font-family: 'Oswald'; font-size: 1rem; cursor: pointer;">DÉJANOS TU CV ></button>
+            </div>
+
+            <div style="background: #f4f4f4; padding: 20px;">
+                <button style="background: var(--orange); color: white; border: none; width: 100%; padding: 15px; font-family: 'Oswald'; font-size: 1rem; cursor: pointer;">LINKEDIN SÍGUENOS ></button>
+            </div>
+
+            <div style="background: #f4f4f4; padding: 20px;">
+                <button style="background: var(--orange); color: white; border: none; width: 100%; padding: 15px; font-family: 'Oswald'; font-size: 1rem; cursor: pointer;">LICITACIONES ></button>
+            </div>
+
+            <div style="background: #f4f4f4; padding: 20px;">
+                <button style="background: var(--orange); color: white; border: none; width: 100%; padding: 15px; font-family: 'Oswald'; font-size: 1rem; cursor: pointer;">PROCESOS CERRADOS ></button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="historia" class="page">
+    <section class="hero-sub" style="background: var(--dark-green); color: white; text-align: center; padding: 60px 20px;">
+        <h1>NUESTRA TRAYECTORIA</h1>
+        <p>Cinco años de vuelo ininterrumpido protegiendo la biodiversidad.</p>
+    </section>
+
+    <div class="container" style="max-width: 1000px; margin: auto; padding: 60px 20px;">
+        
+        <div style="position: relative; border-left: 4px solid var(--light-green); margin-left: 50px; padding: 20px 0;">
+            
+            <div style="position: relative; margin-bottom: 50px; padding-left: 40px;">
+                <div style="position: absolute; left: -12px; top: 0; width: 20px; height: 20px; background: var(--orange); border-radius: 50%; border: 4px solid white;"></div>
+                <h2 style="color: var(--forest-green); font-family: 'Oswald'; margin: 0;">2021: El Nacimiento</h2>
+                <h3 style="color: var(--orange); font-size: 1.1rem; margin: 5px 0 15px;">Fundación de Wings for Earth</h3>
+                <p style="color: #555;">Un grupo de entomólogos y naturalistas decide unir fuerzas en la Comunidad de Madrid para frenar el declive de las poblaciones de mariposas en la Península Ibérica.</p>
+            </div>
+
+            <div style="position: relative; margin-bottom: 50px; padding-left: 40px;">
+                <div style="position: absolute; left: -12px; top: 0; width: 20px; height: 20px; background: var(--orange); border-radius: 50%; border: 4px solid white;"></div>
+                <h2 style="color: var(--forest-green); font-family: 'Oswald'; margin: 0;">2022: Primeros Santuarios</h2>
+                <h3 style="color: var(--orange); font-size: 1.1rem; margin: 5px 0 15px;">Creación de Micro-reservas</h3>
+                <p style="color: #555;">Establecemos las primeras 10 áreas protegidas específicas para lepidópteros, logrando un aumento del 15% en la diversidad de especies locales.</p>
+            </div>
+
+            <div style="position: relative; margin-bottom: 50px; padding-left: 40px;">
+                <div style="position: absolute; left: -12px; top: 0; width: 20px; height: 20px; background: var(--orange); border-radius: 50%; border: 4px solid white;"></div>
+                <h2 style="color: var(--forest-green); font-family: 'Oswald'; margin: 0;">2023: Ciencia Ciudadana</h2>
+                <h3 style="color: var(--orange); font-size: 1.1rem; margin: 5px 0 15px;">Lanzamiento de la App "Alas Libres"</h3>
+                <p style="color: #555;">Miles de voluntarios comienzan a registrar avistamientos, creando el mapa en tiempo real más grande de España sobre rutas migratorias.</p>
+            </div>
+
+            <div style="position: relative; margin-bottom: 50px; padding-left: 40px;">
+                <div style="position: absolute; left: -12px; top: 0; width: 20px; height: 20px; background: var(--orange); border-radius: 50%; border: 4px solid white;"></div>
+                <h2 style="color: var(--forest-green); font-family: 'Oswald'; margin: 0;">2024: Impacto Legislativo</h2>
+                <h3 style="color: var(--orange); font-size: 1.1rem; margin: 5px 0 15px;">Acuerdo de Protección de Praderas</h3>
+                <p style="color: #555;">Logramos influir en la nueva normativa de gestión de riberas, protegiendo las plantas nutricias fundamentales para la mariposa monarca europea.</p>
+            </div>
+
+            <div style="position: relative; padding-left: 40px;">
+                <div style="position: absolute; left: -12px; top: 0; width: 20px; height: 20px; background: var(--forest-green); border-radius: 50%; border: 4px solid white; animation: pulse 2s infinite;"></div>
+                <h2 style="color: var(--forest-green); font-family: 'Oswald'; margin: 0;">HOY</h2>
+                <h3 style="color: var(--orange); font-size: 1.1rem; margin: 5px 0 15px;">Líderes en Conservación de Polinizadores</h3>
+                <p style="color: #555;">Con más de 5.000 socios, seguimos trabajando para que cada rincón de nuestra tierra sea un lugar seguro para volar.</p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 139, 34, 0.7); }
+    70% { transform: scale(1.2); box-shadow: 0 0 0 10px rgba(34, 139, 34, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 139, 34, 0); }
+}
+</style>
+
+<div id="actualidad" class="page">
+    <section class="hero-sub">
+        <h1>ACTUALIDAD: NOTICIAS Y PUBLICACIONES</h1>
+        <p>Últimas noticias sobre la conservación de lepidópteros.</p>
+    </section>
+    <div class="container">
+        <div class="grid">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=800" alt="Noticia 1">
+                <div class="card-content">
+                    <span class="date">30 Abr 2026</span>
+                    <h3>Hito histórico: Aumenta la población de Monarca</h3>
+                    <p>Nuevos corredores biológicos han permitido un aumento del 20% en la migración de este año.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=800" alt="Noticia 2">
+                <div class="card-content">
+                    <span class="date">28 Abr 2026</span>
+                    <h3>Agricultura libre de pesticidas</h3>
+                    <p>Acuerdos con agricultores locales para proteger las zonas de cría nativas de especies vulnerables.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="revista" class="page">
+    <div style="background: var(--light-green); padding: 80px 0;">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 50px;">
+                <h2 style="font-size: 2.5rem;">REVISTA LEPIDÓPTERA</h2>
+                <p style="color: var(--orange); font-weight: bold; font-size: 1.2rem;">La revista para socios y socias</p>
+                <p style="max-width: 700px; margin: auto;">Con la revista trimestral informamos de la actualidad ambiental y de las actividades y proyectos que llevamos a cabo en terreno en defensa de las mariposas.</p>
+            </div>
+
+            <div style="background: white; display: flex; align-items: center; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 40px;">
+                <div style="flex: 1; padding: 40px;">
+                    <h3 style="color: var(--forest-green);">Nuestra revista ahora es digital</h3>
+                    <p>Recibe tu revista Lepidóptera de manera puntual y cómoda en tu correo electrónico. Ahorramos papel, agua y emisiones.</p>
+                    <button class="btn-enviar" style="width: auto; padding: 10px 30px;">ME PASO AL DIGITAL ></button>
+                </div>
+                <div style="flex: 1;">
+                    <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800" style="width: 100%; height: 300px; object-fit: cover;">
+                </div>
+            </div>
+
+            <div class="grid" style="grid-template-columns: 1fr 1fr;">
+                <div style="background: var(--dark-green); color: white; padding: 30px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px;">
+                    <div>
+                        <h4>NUEVA REVISTA JUVENIL</h4>
+                        <p style="font-size: 13px;">Para pequeños de hasta 7 años y jóvenes naturalistas.</p>
+                    </div>
+                    <button style="background: var(--orange); border: none; color: white; padding: 10px; cursor: pointer;">IR A LA REVISTA ></button>
+                </div>
+                <div style="background: var(--dark-green); color: white; padding: 30px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px;">
+                    <div>
+                        <h4>REVISTA CON TRAYECTORIA</h4>
+                        <p style="font-size: 13px;">Navega por nuestro archivo histórico de más de 50 números.</p>
+                    </div>
+                    <button style="background: var(--orange); border: none; color: white; padding: 10px; cursor: pointer;">VER ARCHIVO ></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="biblioteca" class="page" style="padding: 60px 0; background-color: #f9f9f9;">
+    <div class="container" style="max-width: 1100px; margin: auto; padding: 0 20px;">
+        
+        <div style="text-align: center; margin-bottom: 50px;">
+            <h2 style="font-size: 2.5rem; color: #1a472a; margin-bottom: 15px;">BIBLIOTECA: INFORMES Y PUBLICACIONES</h2>
+            <p style="font-style: italic; color: #666;">Gran parte de la labor de Wings for Earth es divulgativa.</p>
+            <p style="max-width: 850px; margin: 15px auto; line-height: 1.6; color: #444;">
+                Desarrollamos exhaustivos informes con una sólida base científica sobre especies protegidas, emergencia climática y protección de hábitats.
+            </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;">
+            
+	<div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s;">
+                <div style="height: 220px; background-color: #e0e0e0; overflow: hidden;">
+                    <img src="https://github.com/PaulaGoMA/WebMariposas/blob/main/img/PraderasFluviales.jpg?raw=true" 
+                         alt="Restauración de praderas fluviales" 
+                         style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="padding: 20px; border-top: 4px solid #1a472a;">
+                    <h4 style="font-size: 1.1rem; color: #333; margin: 0;">Informe: Bases técnicas para la restauración de praderas fluviales</h4>
+                </div>
+            </div>        
+
+	<div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s;">
+                <div style="height: 220px; background-color: #e0e0e0; overflow: hidden;">
+                    <img src="https://github.com/PaulaGoMA/WebMariposas/blob/main/img/LeyNaturaleza.jpg?raw=true" 
+                         alt="Ley de la Naturaleza" 
+                         style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="padding: 20px; border-top: 4px solid #1a472a;">
+                    <h4 style="font-size: 1.1rem; color: #333; margin: 0;">Propuestas para una transposición ambiciosa de la Ley de la Naturaleza</h4>
+                </div>
+            </div>
+
+	<div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s;">
+                <div style="height: 220px; background-color: #e0e0e0; overflow: hidden;">
+                    <img src="https://github.com/PaulaGoMA/WebMariposas/blob/main/img/Biodiversidad.jpg?raw=true" 
+                         alt="Biodiversidad 2026" 
+                         style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div style="padding: 20px; border-top: 4px solid #1a472a;">
+                    <h4 style="font-size: 1.1rem; color: #333; margin: 0;">Los riesgos climáticos y la pérdida de biodiversidad de mariposas en 2026</h4>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="blog" class="page">
+    <section class="hero-sub" style="background: #f9f9f9; text-align: center; padding: 60px 20px; border-bottom: 1px solid #eee;">
+        <h1 style="font-family: 'Oswald'; color: var(--forest-green); font-size: 2.5rem; margin-bottom: 15px;">NUESTROS EXPERTOS/AS OPINAN</h1>
+        <p style="max-width: 700px; margin: auto; color: #666; font-size: 1.1rem; line-height: 1.6;">
+            En esta sección, nuestros especialistas en conservación explican de forma profunda, pero sencilla, los temas clave de la actualidad ambiental.
+        </p>
+    </section>
+
+    <div class="container" style="max-width: 1200px; margin: auto; padding: 50px 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+            
+            <div class="card" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600" style="width: 100%; height: 250px; object-fit: cover;">
+                <div style="background: var(--forest-green); color: white; padding: 15px; text-align: center;">
+                    <h3 style="margin: 0; font-size: 1.1rem; color: white;">Dra. Elena Ramos: El futuro de los polinizadores</h3>
+                </div>
+            </div>
+
+            <div class="card" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <img src="https://github.com/PaulaGoMA/WebMariposas/blob/main/img/EquipoCientifico.png?raw=true" style="width: 100%; height: 250px; object-fit: cover;">
+                <div style="background: var(--forest-green); color: white; padding: 15px; text-align: center;">
+                    <h3 style="margin: 0; font-size: 1.1rem; color: white;">Equipo científico: Por el futuro del campo</h3>
+                </div>
+            </div>
+
+            <div class="card" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=600" style="width: 100%; height: 250px; object-fit: cover;">
+                <div style="background: var(--forest-green); color: white; padding: 15px; text-align: center;">
+                    <h3 style="margin: 0; font-size: 1.1rem; color: white;">Dr. Óscar Esparza: Micro-reservas en España</h3>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="contacta" class="page">
+    <section class="hero-sub">
+        <h1>CONTACTA CON NOSOTROS</h1>
+        <p>¿Tienes dudas o quieres colaborar? Estamos aquí para escucharte.</p>
+    </section>
+
+    <div class="container">
+        <div style="max-width: 600px; margin: 0 auto; background: var(--light-green); padding: 30px; border-radius: 8px; border: 1px solid #ddd;">
+            <h3 style="color: var(--forest-green); text-align: center;">Escríbenos</h3>
+            <form onsubmit="event.preventDefault(); alert('Mensaje enviado correctamente.'); showPage('inicio');">
+                <label style="font-weight: bold; font-size: 14px;">Nombre completo</label>
+                <input type="text" placeholder="Tu nombre" required>
+
+                <label style="font-weight: bold; font-size: 14px;">Correo electrónico</label>
+                <input type="email" placeholder="tu@email.com" required>
+
+                <label style="font-weight: bold; font-size: 14px;">Asunto</label>
+                <select required>
+                    <option value="">Selecciona una opción</option>
+                    <option value="info">Información general</option>
+                    <option value="voluntariado">Voluntariado</option>
+                    <option value="donaciones">Donaciones</option>
+                    <option value="otros">Otros</option>
+                </select>
+
+                <label style="font-weight: bold; font-size: 14px;">Mensaje</label>
+                <textarea style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: 'Roboto', sans-serif; height: 120px; resize: vertical;" placeholder="¿En qué podemos ayudarte?" required></textarea>
+
+                <button type="submit" class="btn-enviar">ENVIAR MENSAJE</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="habitos" class="page">
+    <div class="container" style="text-align: center;">
+        <h2>CAMBIA DE HÁBITOS PARA PROTEGER AL PLANETA</h2>
+        <p style="color: var(--orange); font-weight: bold;">¡Tienes el poder de cambiar las cosas!</p>
+        
+        <p style="max-width: 800px; margin: 20px auto; text-align: justify;">
+            Cada vez hay más personas que viven en ciudades o entornos urbanos alejados de la naturaleza. Pero hay muchas maneras de proteger el planeta a través de <strong>tus hábitos diarios</strong>. 
+            El uso excesivo de pesticidas en jardines privados, la destrucción de flores silvestres y la contaminación lumínica afectan directamente el ciclo de vida de las mariposas, impidiendo su reproducción y alimentación adecuada.
+        </p>
+
+        <div class="habits-grid">
+            <div class="habit-container"><img class="habit-img" src="https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?q=80&w=500" alt="Huerto"></div>
+            <div class="habit-container"><img class="habit-img" src="https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?q=80&w=500" alt="Mariposa"></div>
+            <div class="habit-container"><img class="habit-img" src="https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=500" alt="Plantas"></div>
+        </div>
+
+        <p style="max-width: 800px; margin: 20px auto;">
+            Tienes el poder de <strong>cambiar los mercados</strong>, reducir la contaminación y el derroche de recursos, acelerando en definitiva el camino hacia la sostenibilidad. Pequeños gestos como plantar especies autóctonas en tu balcón crean "oasis" vitales para estas especies.
+        </p>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2026 Wings for Earth - Proyecto Escolar para el IES Alkalá Nahar</p>
+</footer>
+
+<script>
+    function showPage(pageId) {
+        // Seleccionamos todos los contenedores con la clase "page"
+        const pages = document.querySelectorAll('.page');
+        
+        // Los ocultamos todos
+        pages.forEach(p => p.classList.remove('active'));
+
+        // Mostramos el que corresponde al ID
+        const target = document.getElementById(pageId);
+        if (target) {
+            target.classList.add('active');
+        }
+        
+        // Volvemos arriba de la página
+        window.scrollTo(0, 0);
+    }
+
+    function openModal() { document.getElementById("modalSocio").style.display = "flex"; }
+    function closeModal() { document.getElementById("modalSocio").style.display = "none"; }
+    window.onclick = function(event) {
+        let modal = document.getElementById("modalSocio");
+        if (event.target == modal) { closeModal(); }
+    }
+</script>
+
+</body>
+</html>
